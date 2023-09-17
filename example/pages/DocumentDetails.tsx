@@ -1,5 +1,3 @@
-import { documentStore } from "../store/document.store";
-
 type Props = {
   documentId: string;
 };

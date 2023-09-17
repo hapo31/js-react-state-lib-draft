@@ -1,3 +1,5 @@
+import createStore from "../src/store/store";
+
 type DocumentData = {
   documentId: string;
   name: string;
@@ -23,12 +25,12 @@ export const documentStore = createStore<DocumentStore>(
         (id: string) => {
           return store.documents.find((document) => document.documentId === id);
         },
-      getDocumentName:
-        ({ self }) =>
-        (id: string) => {
-          const document = self.getDocumentById(id);
-          return document.name;
-        },
+      // getDocumentName:
+      //   ({ self }) =>
+      //   (id: string) => {
+      //     const document = self.getDocumentById(id);
+      //     return document.name;
+      //   },
     },
     mutations: {
       // store is immer object
@@ -49,3 +51,5 @@ export const documentStore = createStore<DocumentStore>(
     },
   }
 );
+
+console.log(documentStore);
