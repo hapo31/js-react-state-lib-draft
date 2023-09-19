@@ -8,7 +8,7 @@ type InitialValue<T extends Primitive> = T | (() => T) | (() => Promise<T>);
 
 type CreateStoreOptions = {
   selectors: TODO;
-  mutations: TODO;
+  mutations?: TODO;
 };
 
 type SelectorValue = TODO;
@@ -34,9 +34,15 @@ export default function createStore<StoreValue extends Primitive>(
   resolveInitialValue(internals, initialValue);
 
   createSelectors(internals, Object.entries(opts.selectors));
-  createMutations(internals, Object.entries(opts.mutations));
+  if (opts.mutations) {
+    createMutations(internals, Object.entries(opts.mutations));
+  }
 
-  return { __internals__: internals };
+  return Object.defineProperty(internals, "selector", {
+    get() {
+      return internals.storeSelectors;
+    },
+  });
 }
 
 function resolveInitialValue<StoreValue extends Primitive>(
@@ -60,7 +66,7 @@ function createSelectors<StoreValue extends Primitive>(
   internals: StoreInternal<StoreValue>,
   entries: [
     selectorKey: string,
-    selector: (...storeOpts: any) => (...args: any) => any
+    selector: (...storeOpts: TODO) => (...args: TODO) => TODO
   ][]
 ) {
   Object.defineProperties(
@@ -72,6 +78,7 @@ function createSelectors<StoreValue extends Primitive>(
           get() {
             return selector({ store: internals.storeValue });
           },
+          enumerable: true,
         },
       }),
       {}
@@ -83,7 +90,7 @@ function createMutations<StoreValue extends Primitive>(
   internals: StoreInternal<StoreValue>,
   entries: [
     mutationKey: string,
-    mutation: (...storeOpts: any) => (...args: any) => any
+    mutation: (...storeOpts: TODO) => (...args: TODO) => TODO
   ][]
 ) {
   Object.defineProperties(
