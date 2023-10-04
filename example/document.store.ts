@@ -44,12 +44,12 @@ export const documentStore = createStore<DocumentStore>(
           const result = await data.json();
 
           const index = store.documents.findIndex(
-            (doc) => doc.documentId === result.documentId
+            (doc) => doc.documentId === result.documentId,
           );
           store.documents[index] = result;
         },
     },
-  }
+  },
 );
 
 console.log(documentStore);

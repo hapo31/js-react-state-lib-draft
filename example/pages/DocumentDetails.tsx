@@ -1,18 +1,18 @@
-type Props = {
+interface Props {
   documentId: string;
-};
+}
 
 function DocumentDetail({ documentId }: Props) {
   // use selectors in store defined
   const document = documentStore.useValue(
     ({ selectors }) => selectors.getDocumentById(documentId),
-    [documentId]
+    [documentId],
   );
   // use instant selector
   const updatedAt = documentStore.useValue(
     ({ selectors }) =>
       format("YYYY-mm-DD", selectors.getDocumentById(documentId).updatedAt),
-    [documentId]
+    [documentId],
   );
   const { updateDocument } = documentStore.useMutation();
   const [text, setText] = useState(document.text);
