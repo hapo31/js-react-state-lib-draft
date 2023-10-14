@@ -4,18 +4,17 @@ interface Props {
 
 function DocumentDetail({ documentId }: Props) {
   // use selectors in store defined
-  const document = documentStore.useValue(
-    ({ selectors }) => selectors.getDocumentById(documentId),
-    [documentId],
-  );
+  const { getElementById } = useStoreSelector(documentStore);
+  const { updateDocument } = useStoreMutations(documentStore);
+
   // use instant selector
-  const updatedAt = documentStore.useValue(
+  const updatedAt = useStoreSelector(
+    documentStore,
     ({ selectors }) =>
       format("YYYY-mm-DD", selectors.getDocumentById(documentId).updatedAt),
-    [documentId],
+    [documentId]
   );
-  const { updateDocument } = documentStore.useMutation();
-  const [text, setText] = useState(document.text);
+  const [text, setText] = useState(getElementById(documentId).text);
 
   return (
     <div>
