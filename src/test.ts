@@ -1,22 +1,30 @@
 import createStore from "./store/store";
 
-const store = createStore(
-  {
+const store = createStore({
+  defaultValue: {
     hoge: 123,
   },
-  {
-    selectors: {
-      getHoge:
-        // @ts-ignore
-
-
-          ({ store }) =>
-          () =>
-            store.hoge,
-    },
-  }
-);
+  selectors: {
+    getHoge:
+      ({ store }) =>
+      () =>
+        store.hoge,
+  },
+  mutations: {
+    addHoge:
+      ({ storeDraft }) =>
+      (count: number) => {
+        storeDraft.hoge = storeDraft.hoge + count;
+      },
+  },
+});
 
 console.log(store);
-// @ts-ignore
+console.log(store.selector);
+console.log(store.mutation);
+
+console.log(store.selector.getHoge());
+
+store.mutation.addHoge(12);
+
 console.log(store.selector.getHoge());
