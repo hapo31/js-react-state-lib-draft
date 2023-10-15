@@ -22,8 +22,5 @@ module.exports = {
   plugins: ["import"],
 
   rules: {
-    "@typescript-eslint/ban-ts-comment": ["off"],
-    "@typescript-eslint/consistent-type-definitions": ["off"],
-    "@typescript-eslint/no-invalid-void-type": ["off"]
   },
 };
