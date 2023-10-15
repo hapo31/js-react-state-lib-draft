@@ -1,4 +1,4 @@
-import createStore from "./store/store";
+import { createStore } from "./store/store";
 
 const store = createStore({
   defaultValue: {

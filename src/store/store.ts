@@ -1,3 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/array-type */
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
+
 import { type Draft, produce } from "immer";
 
 import { type Primitive, isPrimitive } from "./typeHelpers";
@@ -5,7 +13,7 @@ import { type Primitive, isPrimitive } from "./typeHelpers";
 type TODO = any;
 
 export type Store<
-  TStoreValue extends Primitive,
+  TStoreValue extends StoreValue,
   TSelector,
   TMutation extends MutationResultFunction<TStoreValue, any>,
   TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
@@ -15,33 +23,35 @@ export type Store<
   immutable: boolean;
 };
 
+type StoreValue = Primitive;
+
 type DefaultValue<T extends Primitive> = T | (() => T) | (() => Promise<T>);
 
-type SelectorArgs<TStoreValue extends Primitive> = {
+type SelectorArgs<TStoreValue extends StoreValue> = {
   store: TStoreValue;
 };
 
-type MutationArgs<TStoreValue extends Primitive> = {
+type MutationArgs<TStoreValue extends StoreValue> = {
   storeDraft: Draft<TStoreValue>;
 };
 
-type MutationResultFunction<TStoreValue extends Primitive, Args> = (
+type MutationResultFunction<TStoreValue extends StoreValue, Args> = (
   ...args: Args[]
 ) => TStoreValue | Promise<TStoreValue> | Promise<void> | void;
 
-type SelectorType<TStoreValue extends Primitive, TResultValue> = (
+type SelectorType<TStoreValue extends StoreValue, TResultValue> = (
   args: SelectorArgs<TStoreValue>
 ) => TResultValue;
 
 type MutationType<
-  TStoreValue extends Primitive,
+  TStoreValue extends StoreValue,
   TMutationArg,
   TResultFunction extends MutationResultFunction<TStoreValue, TMutationArg>,
 > = (args: MutationArgs<TStoreValue>) => TResultFunction;
 
 interface CreateStoreOptions<
-  TStoreValue extends Primitive,
-  TSelector,
+  TStoreValue extends StoreValue,
+  TSelector extends SelectorType<TStoreValue, any>,
   TMutation extends MutationResultFunction<TStoreValue, any>,
   TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
   TMutations extends Record<string, MutationType<TStoreValue, any, TMutation>>,
@@ -52,8 +62,8 @@ interface CreateStoreOptions<
 }
 
 interface StoreInternal<
-  TStoreValue extends Primitive,
-  TSelector,
+  TStoreValue extends StoreValue,
+  TSelector extends SelectorType<TStoreValue, any>,
   TMutation extends MutationResultFunction<TStoreValue, any>,
   TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
   TMutations extends Record<string, MutationType<TStoreValue, any, TMutation>>,
@@ -71,9 +81,9 @@ const internalStoreObjects = new WeakMap<
 >();
 let storeCount = 0;
 
-export default function createStore<
-  TStoreValue extends Primitive,
-  TSelector,
+export function createStore<
+  TStoreValue extends StoreValue,
+  TSelector extends SelectorType<TStoreValue, any>,
   TMutation extends MutationResultFunction<TStoreValue, any>,
   TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
   TMutations extends Record<string, MutationType<TStoreValue, any, TMutation>>,
@@ -94,15 +104,18 @@ export default function createStore<
     TMutations
   > = {
     // selectorCache: {},
-    storeSelectors: {},
-    storeMutations: {},
-    storeValue: undefined,
-    defaultValue: undefined,
+    storeSelectors: {} as TSelectors,
+    storeMutations: {} as TMutations,
+    storeValue: undefined as TStoreValue,
+    defaultValue: undefined as TStoreValue,
   };
 
   resolveInitialValue(internals, opts.defaultValue);
 
-  createSelectors(internals, Object.entries(opts.selectors));
+  createSelectors(
+    internals,
+    Object.entries(opts.selectors) as [string, TSelector][]
+  );
   if (opts.mutations != null) {
     createMutations(internals, Object.entries(opts.mutations));
   }
@@ -117,9 +130,25 @@ export default function createStore<
   return storeKey;
 }
 
+export function getStore<
+  TStoreValue extends StoreValue,
+  TSelector extends SelectorType<TStoreValue, any>,
+  TMutation extends MutationResultFunction<TStoreValue, any>,
+  TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
+  TMutations extends Record<string, MutationType<TStoreValue, any, TMutation>>,
+>(store: Store<TStoreValue, TSelector, TMutation, TSelectors, TMutations>) {
+  const storeInstance = internalStoreObjects.get(store);
+
+  if (storeInstance == null) {
+    throw new Error("Notfound store");
+  }
+
+  return storeInstance;
+}
+
 function resolveInitialValue<
-  TStoreValue extends Primitive,
-  TSelector,
+  TStoreValue extends StoreValue,
+  TSelector extends SelectorType<TStoreValue, any>,
   TMutation extends MutationResultFunction<TStoreValue, any>,
   TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
   TMutations extends Record<string, MutationType<TStoreValue, any, TMutation>>,
@@ -153,8 +182,8 @@ function resolveInitialValue<
 }
 
 function createSelectors<
-  TStoreValue extends Primitive,
-  TSelector,
+  TStoreValue extends StoreValue,
+  TSelector extends SelectorType<TStoreValue, any>,
   TMutation extends MutationResultFunction<TStoreValue, any>,
   TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
   TMutations extends Record<string, MutationType<TStoreValue, any, TMutation>>,
@@ -166,13 +195,8 @@ function createSelectors<
     TSelectors,
     TMutations
   >,
-  entries: Array<
-    [
-      selectorKey: string,
-      selector: (...storeOpts: TODO) => (...args: TODO) => TODO,
-    ]
-  >
-): TODO {
+  entries: Array<[string, TSelector]>
+) {
   Object.defineProperties(
     internals.storeSelectors,
     entries.reduce(
@@ -191,8 +215,8 @@ function createSelectors<
 }
 
 function createMutations<
-  TStoreValue extends Primitive,
-  TSelector,
+  TStoreValue extends StoreValue,
+  TSelector extends SelectorType<TStoreValue, any>,
   TMutation extends MutationResultFunction<TStoreValue, any>,
   TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
   TMutations extends Record<string, MutationType<TStoreValue, any, TMutation>>,
