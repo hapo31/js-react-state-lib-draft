@@ -1,4 +1,4 @@
-import { createStore } from "./store/store";
+import { createStore, getStore } from "./store/store";
 
 const store = createStore({
   defaultValue: {
@@ -19,12 +19,14 @@ const store = createStore({
   },
 });
 
-console.log(store);
-console.log(store.selector);
-console.log(store.mutation);
+const storeIns = getStore(store);
 
-console.log(store.selector.getHoge());
+console.log(storeIns);
+console.log(storeIns.selector);
+console.log(storeIns.mutation);
 
-store.mutation.addHoge(12);
+console.log(storeIns.selector.getHoge());
 
-console.log(store.selector.getHoge());
+storeIns.mutation.addHoge(12);
+
+console.log(storeIns.selector.getHoge());

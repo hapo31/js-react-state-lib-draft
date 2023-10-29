@@ -12,7 +12,12 @@ import { type Primitive, isPrimitive } from "./typeHelpers";
 
 type TODO = any;
 
-export type Store<
+export type Store<TSelectors, TMutations> = {
+  selector: TSelectors;
+  mutation: TMutations;
+};
+
+type InternalStore<
   TStoreValue extends StoreValue,
   TSelector,
   TMutation extends MutationResultFunction<TStoreValue, any>,
@@ -76,7 +81,7 @@ interface StoreInternal<
 }
 
 const internalStoreObjects = new WeakMap<
-  Store<any, any, any, any, any>,
+  InternalStore<any, any, any, any, any>,
   StoreInternal<any, any, any, any, any>
 >();
 let storeCount = 0;
@@ -95,7 +100,7 @@ export function createStore<
     TSelectors,
     TMutations
   >
-): Store<TStoreValue, TSelector, TMutation, TSelectors, TMutations> {
+): InternalStore<TStoreValue, TSelector, TMutation, TSelectors, TMutations> {
   const internals: StoreInternal<
     TStoreValue,
     TSelector,
@@ -136,7 +141,15 @@ export function getStore<
   TMutation extends MutationResultFunction<TStoreValue, any>,
   TSelectors extends Record<string, SelectorType<TStoreValue, TSelector>>,
   TMutations extends Record<string, MutationType<TStoreValue, any, TMutation>>,
->(store: Store<TStoreValue, TSelector, TMutation, TSelectors, TMutations>) {
+>(
+  store: InternalStore<
+    TStoreValue,
+    TSelector,
+    TMutation,
+    TSelectors,
+    TMutations
+  >
+): Store<TSelectors, TMutations> {
   const storeInstance = internalStoreObjects.get(store);
 
   if (storeInstance == null) {
